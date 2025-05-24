@@ -1,43 +1,34 @@
 package com.project1.taskapi.service.impl;
 
 import com.project1.taskapi.model.Notification;
+import com.project1.taskapi.repository.NotificationRepository;
 import com.project1.taskapi.service.NotificationService;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
-    private final Map<UUID, Notification> notifications = new HashMap<>();
+    private final NotificationRepository notificationRepository;
+
+    public NotificationServiceImpl(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
 
     @Override
     public List<Notification> getAllNotifications(UUID userId) {
-        List<Notification> result = new ArrayList<>();
-        for (Notification n : notifications.values()) {
-            if (n.getUserId().equals(userId)) {
-                result.add(n);
-            }
-        }
-        return result;
+        return notificationRepository.findByUserId(userId);
     }
 
     @Override
     public List<Notification> getPendingNotifications(UUID userId) {
-        List<Notification> result = new ArrayList<>();
-        for (Notification n : notifications.values()) {
-            if (n.getUserId().equals(userId) && !n.isRead()) {
-                result.add(n);
-            }
-        }
-        return result;
+        return notificationRepository.findByUserIdAndReadFalse(userId);
     }
 
     @Override
     public Notification addNotification(Notification notification) {
-        UUID id = UUID.randomUUID();
-        notification.setId(id);
-        notifications.put(id, notification);
-        return notification;
+        return notificationRepository.save(notification);
     }
 }
