@@ -37,8 +37,7 @@ public class TaskServiceImpl implements TaskService {
     public Task addTask(Task task) {
         UUID id = UUID.randomUUID();
         task.setId(id);
-        task.setDeleted(false);
-        task.setCompleted(false);
+        task.setDeleted(false); // Optional
         tasks.put(id, task);
         return task;
     }
