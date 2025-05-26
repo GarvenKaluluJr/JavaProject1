@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,8 +32,7 @@ class TaskServiceImplTest {
         Task task = new Task();
         task.setUserId(userId);
         task.setDescription("Finish assignment");
-
-        // Mock repository to return the same task with id
+        // Simulate repository.save() returning the same task with an ID
         Task savedTask = new Task();
         savedTask.setId(UUID.randomUUID());
         savedTask.setUserId(userId);
@@ -49,62 +48,60 @@ class TaskServiceImplTest {
         assertEquals("Finish assignment", added.getDescription());
         assertFalse(added.isCompleted());
         assertFalse(added.isDeleted());
-        verify(taskRepository).save(any(Task.class));
+
+        // Ensure repository.save was called
+        verify(taskRepository, times(1)).save(any(Task.class));
     }
 
     @Test
     void testGetAllTasks() {
-        List<Task> tasks = new ArrayList<>();
         Task t1 = new Task();
         t1.setUserId(userId);
         t1.setDescription("Task 1");
-        tasks.add(t1);
 
         Task t2 = new Task();
         t2.setUserId(userId);
         t2.setDescription("Task 2");
-        tasks.add(t2);
 
-        when(taskRepository.findByUserIdAndDeletedFalse(userId)).thenReturn(tasks);
+        when(taskRepository.findByUserIdAndDeletedFalse(userId)).thenReturn(Arrays.asList(t1, t2));
 
         List<Task> all = taskService.getAllTasks(userId);
-
         assertEquals(2, all.size());
-        verify(taskRepository).findByUserIdAndDeletedFalse(userId);
+        assertEquals("Task 1", all.get(0).getDescription());
+        assertEquals("Task 2", all.get(1).getDescription());
+        verify(taskRepository, times(1)).findByUserIdAndDeletedFalse(userId);
     }
 
     @Test
     void testGetPendingTasks() {
-        List<Task> pendingTasks = new ArrayList<>();
         Task t1 = new Task();
         t1.setUserId(userId);
         t1.setCompleted(false);
-        pendingTasks.add(t1);
 
-        when(taskRepository.findByUserIdAndCompletedFalseAndDeletedFalse(userId)).thenReturn(pendingTasks);
+        when(taskRepository.findByUserIdAndCompletedFalseAndDeletedFalse(userId)).thenReturn(List.of(t1));
 
         List<Task> pending = taskService.getPendingTasks(userId);
-
         assertEquals(1, pending.size());
         assertFalse(pending.get(0).isCompleted());
-        verify(taskRepository).findByUserIdAndCompletedFalseAndDeletedFalse(userId);
+        verify(taskRepository, times(1)).findByUserIdAndCompletedFalseAndDeletedFalse(userId);
     }
 
     @Test
     void testDeleteTaskSetsDeletedFlag() {
+        UUID taskId = UUID.randomUUID();
         Task task = new Task();
-        task.setId(UUID.randomUUID());
+        task.setId(taskId);
         task.setUserId(userId);
-        task.setDeleted(false);
 
-        when(taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
         when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-        taskService.deleteTask(task.getId());
+        taskService.deleteTask(taskId);
 
+        // Capture the task that was saved
         ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
         verify(taskRepository).save(captor.capture());
-        assertTrue(captor.getValue().isDeleted());
-        verify(taskRepository).findById(task.getId());
+        Task deletedTask = captor.getValue();
+        assertTrue(deletedTask.isDeleted());
     }
 }
