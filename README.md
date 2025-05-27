@@ -1,4 +1,4 @@
-avaProject1: Task Management System
+JavaProject1: Task Management System
 
 ## Overview
 
