@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import com.project1.taskapi.messaging.TaskEvent;
+import com.project1.taskapi.messaging.TaskEventPublisher;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,10 +20,13 @@ import java.util.UUID;
 public class TaskServiceImpl implements TaskService {
 
     private static final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
-    private final TaskRepository taskRepository;
 
-    public TaskServiceImpl(TaskRepository taskRepository) {
+    private final TaskRepository taskRepository;           // <<--- MISSING FIELD!
+    private final TaskEventPublisher taskEventPublisher;
+
+    public TaskServiceImpl(TaskRepository taskRepository, TaskEventPublisher taskEventPublisher) {
         this.taskRepository = taskRepository;
+        this.taskEventPublisher = taskEventPublisher;
     }
 
     @Override
@@ -41,7 +47,18 @@ public class TaskServiceImpl implements TaskService {
     public Task addTask(Task task) {
         task.setCompleted(false);
         task.setDeleted(false);
-        return taskRepository.save(task);
+        task.setCreationDate(LocalDateTime.now());
+        Task savedTask = taskRepository.save(task);
+
+        // Publish RabbitMQ event
+        TaskEvent event = new TaskEvent();
+        event.setId(savedTask.getId());
+        event.setUserId(savedTask.getUserId());
+        event.setDescription(savedTask.getDescription());
+        event.setCreationDate(savedTask.getCreationDate());
+        taskEventPublisher.publishTaskCreatedEvent(event);
+
+        return savedTask;
     }
 
     @Override

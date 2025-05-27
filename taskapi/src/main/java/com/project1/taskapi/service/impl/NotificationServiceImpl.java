@@ -31,4 +31,13 @@ public class NotificationServiceImpl implements NotificationService {
     public Notification addNotification(Notification notification) {
         return notificationRepository.save(notification);
     }
+
+    // IMPLEMENT THIS METHOD:
+    @Override
+    public void markAsRead(UUID notificationId) {
+        notificationRepository.findById(notificationId).ifPresent(notification -> {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+        });
+    }
 }
