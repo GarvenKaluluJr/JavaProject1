@@ -8,4 +8,6 @@ public interface NotificationService {
     List<Notification> getAllNotifications(UUID userId);
     List<Notification> getPendingNotifications(UUID userId);
     Notification addNotification(Notification notification);
+
+    void markAsRead(UUID notificationId);
 }

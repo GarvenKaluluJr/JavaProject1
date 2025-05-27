@@ -24,8 +24,7 @@ public class TaskController {
     public List<Task> getPendingTasks(@PathVariable UUID userId) {
         return taskService.getPendingTasks(userId);
     }
-
-    @PostMapping("/")
+    @PostMapping
     public Task addTask(@RequestBody Task task) {
         return taskService.addTask(task);
     }
