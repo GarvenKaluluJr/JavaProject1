@@ -67,5 +67,5 @@ This is a multi-stage, production-style Java Spring Boot application for task ma
 
 ### **Step 8: Scheduling & Async Tasks**
 - Used `@Scheduled` to periodically check and update overdue tasks.
-- Implemented `@Async` for background task processing (non-blocking).
+- Implemented `@Async` for background task processing.
 - Ensured scheduled and async tasks work reliably in production and container environments.
