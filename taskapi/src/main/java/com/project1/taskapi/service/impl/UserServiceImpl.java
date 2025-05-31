@@ -1,35 +1,37 @@
 package com.project1.taskapi.service.impl;
 
 import com.project1.taskapi.model.User;
-import com.project1.taskapi.repository.UserRepository;
 import com.project1.taskapi.service.UserService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
+@Profile("memory")
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
-
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final Map<String, User> usersByUsername = new HashMap<>();
+    private final Map<UUID, User> usersById = new HashMap<>();
 
     @Override
     public User register(User user) {
-        userRepository.findByUsername(user.getUsername())
-                .ifPresent(u -> { throw new RuntimeException("Username already exists"); });
-        return userRepository.save(user);
+        if (usersByUsername.containsKey(user.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+        user.setId(UUID.randomUUID());
+        usersByUsername.put(user.getUsername(), user);
+        usersById.put(user.getId(), user);
+        return user;
     }
 
     @Override
     public User login(String username) {
-        return userRepository.findByUsername(username).orElse(null);
+        return usersByUsername.get(username);
     }
 
     @Override
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return new ArrayList<>(usersById.values());
     }
 }

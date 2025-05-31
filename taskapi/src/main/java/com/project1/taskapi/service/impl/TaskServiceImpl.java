@@ -1,92 +1,55 @@
 package com.project1.taskapi.service.impl;
 
 import com.project1.taskapi.model.Task;
-import com.project1.taskapi.repository.TaskRepository;
 import com.project1.taskapi.service.TaskService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import com.project1.taskapi.messaging.TaskEvent;
-import com.project1.taskapi.messaging.TaskEventPublisher;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
+@Profile("memory")
 public class TaskServiceImpl implements TaskService {
 
-    private static final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
-
-    private final TaskRepository taskRepository;           // <<--- MISSING FIELD!
-    private final TaskEventPublisher taskEventPublisher;
-
-    public TaskServiceImpl(TaskRepository taskRepository, TaskEventPublisher taskEventPublisher) {
-        this.taskRepository = taskRepository;
-        this.taskEventPublisher = taskEventPublisher;
-    }
+    private final Map<UUID, Task> tasks = new HashMap<>();
 
     @Override
-    @Cacheable(value = "tasks", key = "#userId")
     public List<Task> getAllTasks(UUID userId) {
-        log.info("Fetching tasks for user {} from DB (not cache)", userId);
-        return taskRepository.findByUserIdAndDeletedFalse(userId);
+        List<Task> result = new ArrayList<>();
+        for (Task task : tasks.values()) {
+            if (task.getUserId().equals(userId) && !task.isDeleted()) {
+                result.add(task);
+            }
+        }
+        return result;
     }
 
     @Override
-    @Cacheable(value = "pendingTasks", key = "#userId")
     public List<Task> getPendingTasks(UUID userId) {
-        return taskRepository.findByUserIdAndCompletedFalseAndDeletedFalse(userId);
+        List<Task> result = new ArrayList<>();
+        for (Task task : tasks.values()) {
+            if (task.getUserId().equals(userId) && !task.isCompleted() && !task.isDeleted()) {
+                result.add(task);
+            }
+        }
+        return result;
     }
 
     @Override
-    @CacheEvict(value = {"tasks", "pendingTasks"}, key = "#task.userId")
     public Task addTask(Task task) {
-        task.setCompleted(false);
-        task.setDeleted(false);
-        task.setCreationDate(LocalDateTime.now());
-        Task savedTask = taskRepository.save(task);
-
-        // Publish RabbitMQ event
-        TaskEvent event = new TaskEvent();
-        event.setId(savedTask.getId());
-        event.setUserId(savedTask.getUserId());
-        event.setDescription(savedTask.getDescription());
-        event.setCreationDate(savedTask.getCreationDate());
-        taskEventPublisher.publishTaskCreatedEvent(event);
-
-        return savedTask;
+        UUID id = UUID.randomUUID();
+        task.setId(id);
+        task.setDeleted(false); // Only force not-deleted. Do NOT overwrite "completed"!
+        // This means if you setCompleted(true) before calling addTask, it will be respected.
+        tasks.put(id, task);
+        return task;
     }
 
     @Override
-    @CacheEvict(value = {"tasks", "pendingTasks"}, allEntries = true)
     public void deleteTask(UUID taskId) {
-        Optional<Task> opt = taskRepository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
+        Task task = tasks.get(taskId);
+        if (task != null) {
             task.setDeleted(true);
-            taskRepository.save(task);
         }
-    }
-
-    @Override
-    @CacheEvict(value = {"tasks", "pendingTasks"}, key = "#userId")
-    public Task markTaskCompleted(UUID taskId, UUID userId) {
-        Optional<Task> opt = taskRepository.findById(taskId);
-        if (opt.isPresent()) {
-            Task task = opt.get();
-            task.setCompleted(true);
-            return taskRepository.save(task);
-        }
-        throw new RuntimeException("Task not found");
-    }
-
-    @Override
-    @CacheEvict(value = {"tasks", "pendingTasks"}, allEntries = true)
-    public void evictAllCaches() {
-        // No-op
     }
 }

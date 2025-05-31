@@ -1,28 +1,33 @@
 package com.project1.taskapi.model;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 import java.util.UUID;
 
 @Entity
-@Table(name = "notifications")
 public class Notification {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Column(nullable = false)
     private UUID userId;
 
     private String message;
-
     private boolean read;
 
-    // Getters and setters
+    // Constructors
+    public Notification() {}
+
+    public Notification(UUID id, UUID userId, String message, boolean read) {
+        this.id = id;
+        this.userId = userId;
+        this.message = message;
+        this.read = read;
+    }
+
+    // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
