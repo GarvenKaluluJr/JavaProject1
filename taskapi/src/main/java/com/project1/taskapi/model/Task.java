@@ -1,35 +1,40 @@
 package com.project1.taskapi.model;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks")
 public class Task {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Column(nullable = false)
     private UUID userId;
 
     private String description;
-
     private LocalDateTime creationDate;
-
     private LocalDateTime targetDate;
-
     private boolean completed;
-
     private boolean deleted;
 
-    // Getters and setters
+    // Constructors
+    public Task() {}
+
+    public Task(UUID id, UUID userId, String description, LocalDateTime creationDate, LocalDateTime targetDate, boolean completed, boolean deleted) {
+        this.id = id;
+        this.userId = userId;
+        this.description = description;
+        this.creationDate = creationDate;
+        this.targetDate = targetDate;
+        this.completed = completed;
+        this.deleted = deleted;
+    }
+
+    // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 

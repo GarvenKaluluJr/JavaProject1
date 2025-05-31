@@ -2,27 +2,26 @@ package com.project1.taskapi.controller;
 
 import com.project1.taskapi.model.Notification;
 import com.project1.taskapi.service.NotificationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
 public class NotificationController {
+
     private final NotificationService notificationService;
-    public NotificationController(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
+    public NotificationController(NotificationService notificationService) { this.notificationService = notificationService; }
 
     @GetMapping("/{userId}")
-    public List<Notification> getUserNotifications(@PathVariable UUID userId) {
-        return notificationService.getAllNotifications(userId);
+    public ResponseEntity<List<Notification>> getAll(@PathVariable UUID userId) {
+        return ResponseEntity.ok(notificationService.getAllNotifications(userId));
     }
 
-
-    @PutMapping("/read/{notificationId}")
-    public void markAsRead(@PathVariable UUID notificationId) {
-        notificationService.markAsRead(notificationId);
+    @GetMapping("/{userId}/pending")
+    public ResponseEntity<List<Notification>> getPending(@PathVariable UUID userId) {
+        return ResponseEntity.ok(notificationService.getPendingNotifications(userId));
     }
 }
