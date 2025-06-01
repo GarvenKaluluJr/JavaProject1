@@ -23,6 +23,13 @@ services:
       - "8080:8080"
     depends_on:
       - db
-
+      - redis
+  redis:
+    image: redis:7-alpine
+    container_name: taskapi_redis
+    ports:
+      - "6379:6379"
 volumes:
   taskapi_db_data:
+
+

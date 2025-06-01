@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@Profile("postgres")
+@Profile({"postgres", "redis"})
 public class NotificationServiceDbImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     public NotificationServiceDbImpl(NotificationRepository notificationRepository) {

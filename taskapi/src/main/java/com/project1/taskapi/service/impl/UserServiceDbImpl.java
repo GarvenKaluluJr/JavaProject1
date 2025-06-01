@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@Profile("postgres")
+@Profile({"postgres", "redis"})
 public class UserServiceDbImpl implements UserService {
 
     private final UserRepository userRepository;
