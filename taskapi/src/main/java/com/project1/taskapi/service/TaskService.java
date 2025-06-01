@@ -8,8 +8,6 @@ public interface TaskService {
     List<Task> getAllTasks(UUID userId);
     List<Task> getPendingTasks(UUID userId);
     Task addTask(Task task);
-    void deleteTask(UUID taskId);
-    Task markTaskCompleted(UUID taskId, UUID userId);
-    void evictAllCaches();
+    void deleteTask(UUID taskId); // Marks as deleted
 }
 

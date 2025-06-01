@@ -1,34 +1,22 @@
 package com.project1.taskapi.service.impl;
 
-// ...other imports...
 import com.project1.taskapi.model.Task;
-import com.project1.taskapi.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class TaskServiceImplTest {
 
     private TaskServiceImpl taskService;
-    private TaskRepository taskRepository;
     private UUID userId;
 
     @BeforeEach
     void setUp() {
-        taskRepository = mock(TaskRepository.class);
-        CacheManager cacheManager = new ConcurrentMapCacheManager("tasks", "pendingTasks");
-        taskService = new TaskServiceImpl(taskRepository);
+        taskService = new TaskServiceImpl();
         userId = UUID.randomUUID();
     }
 
@@ -37,23 +25,56 @@ class TaskServiceImplTest {
         Task task = new Task();
         task.setUserId(userId);
         task.setDescription("Finish assignment");
-        Task savedTask = new Task();
-        savedTask.setId(UUID.randomUUID());
-        savedTask.setUserId(userId);
-        savedTask.setDescription("Finish assignment");
-        savedTask.setCompleted(false);
-        savedTask.setDeleted(false);
-
-        when(taskRepository.save(any(Task.class))).thenReturn(savedTask);
-
         Task added = taskService.addTask(task);
 
         assertNotNull(added.getId());
         assertEquals("Finish assignment", added.getDescription());
         assertFalse(added.isCompleted());
         assertFalse(added.isDeleted());
-        verify(taskRepository, times(1)).save(any(Task.class));
     }
 
-    // ... (other tests)
+    @Test
+    void testGetAllTasks() {
+        Task t1 = new Task();
+        t1.setUserId(userId);
+        t1.setDescription("Task 1");
+        taskService.addTask(t1);
+
+        Task t2 = new Task();
+        t2.setUserId(userId);
+        t2.setDescription("Task 2");
+        taskService.addTask(t2);
+
+        List<Task> all = taskService.getAllTasks(userId);
+        assertEquals(2, all.size());
+    }
+
+    @Test
+    void testGetPendingTasks() {
+        Task t1 = new Task();
+        t1.setUserId(userId);
+        t1.setCompleted(false);
+        taskService.addTask(t1);
+
+        Task t2 = new Task();
+        t2.setUserId(userId);
+        t2.setCompleted(true);
+        taskService.addTask(t2);
+
+        List<Task> pending = taskService.getPendingTasks(userId);
+        assertEquals(1, pending.size());
+        assertFalse(pending.get(0).isCompleted());
+    }
+
+    @Test
+    void testDeleteTaskSetsDeletedFlag() {
+        Task task = new Task();
+        task.setUserId(userId);
+        Task added = taskService.addTask(task);
+
+        taskService.deleteTask(added.getId());
+
+        List<Task> all = taskService.getAllTasks(userId);
+        assertEquals(0, all.size(), "Deleted tasks should not show up in getAllTasks");
+    }
 }
