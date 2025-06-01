@@ -1,5 +1,6 @@
 package com.project1.taskapi.model;
 
+import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import java.util.UUID;
 
@@ -11,6 +12,9 @@ public class Task {
 
     @Column(name = "user_id")
     private UUID userId;
+
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
 
     private String description;
     private boolean completed;
