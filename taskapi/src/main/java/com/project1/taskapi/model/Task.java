@@ -1,46 +1,21 @@
 package com.project1.taskapi.model;
 
 import jakarta.persistence.*;
-<<<<<<< Updated upstream
-import org.hibernate.annotations.GenericGenerator;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-@Entity
-@Table(name = "tasks")
-=======
 import java.util.UUID;
 
 @Entity
 @Table(name = "task")
->>>>>>> Stashed changes
 public class Task {
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @Column(name = "user_id")
     private UUID userId;
 
     private String description;
-<<<<<<< Updated upstream
-
-    private LocalDateTime creationDate;
-
-    private LocalDateTime targetDate;
-
-=======
->>>>>>> Stashed changes
     private boolean completed;
-
     private boolean deleted;
 
-<<<<<<< Updated upstream
-    // Getters and setters
-=======
     public Task() {}
 
     public Task(UUID id, UUID userId, String description, boolean completed, boolean deleted) {
@@ -51,7 +26,6 @@ public class Task {
         this.deleted = deleted;
     }
 
->>>>>>> Stashed changes
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
