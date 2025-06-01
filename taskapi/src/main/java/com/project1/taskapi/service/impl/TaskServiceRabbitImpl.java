@@ -2,15 +2,14 @@ package com.project1.taskapi.service.impl;
 
 import com.project1.taskapi.model.Task;
 import com.project1.taskapi.service.TaskService;
-import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-@Profile("memory")
-public class TaskServiceImpl implements TaskService {
-
+@Profile("rabbit")
+public class TaskServiceRabbitImpl implements TaskService {
     private final Map<UUID, Task> tasks = new HashMap<>();
 
     @Override
@@ -40,6 +39,7 @@ public class TaskServiceImpl implements TaskService {
         UUID id = UUID.randomUUID();
         task.setId(id);
         task.setDeleted(false);
+        task.setCompleted(false);
         tasks.put(id, task);
         return task;
     }
