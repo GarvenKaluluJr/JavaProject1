@@ -10,3 +10,4 @@ public interface TaskService {
     Task addTask(Task task);
     void deleteTask(UUID taskId); // Marks as deleted
 }
+
