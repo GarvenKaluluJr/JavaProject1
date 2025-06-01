@@ -3,21 +3,19 @@ package com.project1.taskapi.service.impl;
 import com.project1.taskapi.model.Notification;
 import com.project1.taskapi.repository.NotificationRepository;
 import com.project1.taskapi.service.NotificationService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
-<<<<<<< Updated upstream
-=======
-@Profile({"memory"})
->>>>>>> Stashed changes
-public class NotificationServiceImpl implements NotificationService {
+@Profile("postgres")
+public class NotificationServiceDbImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    public NotificationServiceImpl(NotificationRepository notificationRepository) {
+    public NotificationServiceDbImpl(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 
